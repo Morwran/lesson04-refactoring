@@ -50,7 +50,29 @@ public:
 		movie(_movie), daysRented(_daysRented)
 	{}
 	Movie getMovie() const { return movie; }
+
 	int getDaysRented() const { return daysRented; }
+
+	double getCharge() {
+		double result = 0;
+		// Определить сумму для каждой строки.
+		switch (getMovie().getPriceCode()) {
+		case Movie::REGULAR:
+			result += 2;
+			if (getDaysRented() > 2)
+				result += (getDaysRented() - 2) * 1.5;
+			break;
+		case Movie::NEW_RELEASE:
+			result += getDaysRented() * 3;
+			break;
+		case Movie::CHLDREN:
+			result += 1.5;
+			if (getDaysRented() > 3)
+				result += (getDaysRented() - 3) * 1.5;
+				break;
+		}
+		return result;
+	}
 private:
 	Movie movie;
 	int daysRented {0};
@@ -82,41 +104,19 @@ public:
 		std::string result = "Учет аренды для : " + name;
 		// Затем для каждого клиента мы рассчитываем задолженность...
 		for (auto& rent : rentals) {
-			double thisAmount = amountFor(rent);
 			// Добавить очки для активного арендатора.
 			frequentRenterPoints++;
 			// Бонус за аренду новинки на два дня.
 			if ((rent.getMovie().getPriceCode() == 1) && rent.getDaysRented() > 1)
 				frequentRenterPoints++;
 			// Показать результаты для этой аренды
-			result += "\t" + rent.getMovie().getTitle() + "\t" + std::to_string(thisAmount) + "\n";
-			totalAmount += thisAmount;
+			result += "\t" + rent.getMovie().getTitle() + "\t" + std::to_string(rent.getCharge()) + "\n";
+			totalAmount += rent.getCharge();
 		}
 
 		// Добавить нижний колонтитул
 		result += "Сумма задолженности составляет " + std::to_string(totalAmount) + "\n";
 		result += "Вы заработали " + std::to_string(frequentRenterPoints) + " очков ";
-		return result;
-	}
-private:
-	double amountFor(const Rental & rent){
-		double result = 0;
-		// Определить сумму для каждой строки.
-		switch (rent.getMovie().getPriceCode()) {
-		case Movie::REGULAR:
-			result += 2;
-			if (rent.getDaysRented() > 2)
-				result += (rent.getDaysRented() - 2) * 1.5;
-			break;
-		case Movie::NEW_RELEASE:
-			result += rent.getDaysRented() * 3;
-			break;
-		case Movie::CHLDREN:
-			result += 1.5;
-			if (rent.getDaysRented() > 3)
-				result += (rent.getDaysRented() - 3) * 1.5;
-				break;
-		}
 		return result;
 	}
 };
