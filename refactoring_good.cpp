@@ -73,6 +73,13 @@ public:
 		}
 		return result;
 	}
+	int getFrequentRenterPoints() {
+		// Бонус за аренду новинки на два дня
+		if ((getMovie().getPriceCode() == Movie::NEW_RELEASE) && getDaysRented() > 1)
+			return 2;
+		else
+			return 1;
+	}
 private:
 	Movie movie;
 	int daysRented {0};
@@ -105,10 +112,7 @@ public:
 		// Затем для каждого клиента мы рассчитываем задолженность...
 		for (auto& rent : rentals) {
 			// Добавить очки для активного арендатора.
-			frequentRenterPoints++;
-			// Бонус за аренду новинки на два дня.
-			if ((rent.getMovie().getPriceCode() == 1) && rent.getDaysRented() > 1)
-				frequentRenterPoints++;
+			frequentRenterPoints += rent.getFrequentRenterPoints();
 			// Показать результаты для этой аренды
 			result += "\t" + rent.getMovie().getTitle() + "\t" + std::to_string(rent.getCharge()) + "\n";
 			totalAmount += rent.getCharge();
