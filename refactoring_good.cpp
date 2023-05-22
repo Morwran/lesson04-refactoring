@@ -82,23 +82,7 @@ public:
 		std::string result = "Учет аренды для : " + name;
 		// Затем для каждого клиента мы рассчитываем задолженность...
 		for (auto& rent : rentals) {
-			double thisAmount = 0;
-			// Определить сумму для каждой строки.
-			switch (rent.getMovie().getPriceCode()) {
-			case Movie::REGULAR:
-				thisAmount += 2;
-				if (rent.getDaysRented() > 2)
-					thisAmount += (rent.getDaysRented() - 2) * 1.5;
-				break;
-			case Movie::NEW_RELEASE:
-				thisAmount += rent.getDaysRented() * 3;
-				break;
-			case Movie::CHLDREN:
-				thisAmount += 1.5;
-				if (rent.getDaysRented() > 3)
-					thisAmount += (rent.getDaysRented() - 3) * 1.5;
-					break;
-			}
+			double thisAmount = amountFor(rent);
 			// Добавить очки для активного арендатора.
 			frequentRenterPoints++;
 			// Бонус за аренду новинки на два дня.
@@ -112,6 +96,27 @@ public:
 		// Добавить нижний колонтитул
 		result += "Сумма задолженности составляет " + std::to_string(totalAmount) + "\n";
 		result += "Вы заработали " + std::to_string(frequentRenterPoints) + " очков ";
+		return result;
+	}
+private:
+	double amountFor(const Rental & rent){
+		double result = 0;
+		// Определить сумму для каждой строки.
+		switch (rent.getMovie().getPriceCode()) {
+		case Movie::REGULAR:
+			result += 2;
+			if (rent.getDaysRented() > 2)
+				result += (rent.getDaysRented() - 2) * 1.5;
+			break;
+		case Movie::NEW_RELEASE:
+			result += rent.getDaysRented() * 3;
+			break;
+		case Movie::CHLDREN:
+			result += 1.5;
+			if (rent.getDaysRented() > 3)
+				result += (rent.getDaysRented() - 3) * 1.5;
+				break;
+		}
 		return result;
 	}
 };
