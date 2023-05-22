@@ -106,21 +106,32 @@ public:
 	std::string Statement()
 	{
 		// Сначала мы объявляем локальные переменные.
-		double totalAmount = 0;
-		int frequentRenterPoints = 0;
 		std::string result = "Учет аренды для : " + name;
 		// Затем для каждого клиента мы рассчитываем задолженность...
 		for (auto& rent : rentals) {
-			// Добавить очки для активного арендатора.
-			frequentRenterPoints += rent.getFrequentRenterPoints();
 			// Показать результаты для этой аренды
 			result += "\t" + rent.getMovie().getTitle() + "\t" + std::to_string(rent.getCharge()) + "\n";
-			totalAmount += rent.getCharge();
 		}
 
 		// Добавить нижний колонтитул
-		result += "Сумма задолженности составляет " + std::to_string(totalAmount) + "\n";
-		result += "Вы заработали " + std::to_string(frequentRenterPoints) + " очков ";
+		result += "Сумма задолженности составляет " + std::to_string(getTotalCharge()) + "\n";
+		result += "Вы заработали " + std::to_string(getTotalFrequentRenterPoints()) + " очков ";
+		return result;
+	}
+private:
+	double getTotalCharge() {
+		double result = 0;
+		for (auto& rent : rentals) {
+			result += rent.getCharge();
+		}
+		return result;
+	}
+	int getTotalFrequentRenterPoints(){
+		int result = 0;
+		for (auto& rent : rentals) {
+			// Добавить очки для активного арендатора.
+			result += rent.getFrequentRenterPoints();
+		}
 		return result;
 	}
 };
