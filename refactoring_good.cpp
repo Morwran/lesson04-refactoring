@@ -15,6 +15,31 @@ int priceCode		int DaysRented		statement()
 #include <vector>
 #include <gtest/gtest.h>
 
+class PriceBase {
+public:
+	virtual int getPriceCode() = 0;
+	virtual double getCharge(int daysRented) = 0;
+	virtual ~PriceBase(){}
+};
+
+class ChildrensPrice : public PriceBase {
+public:
+	int getPriceCode() override;
+	double getCharge(int daysRented) override;
+};
+
+class NewReleasePrice : public PriceBase {
+public:
+	int getPriceCode() override;
+	double getCharge(int daysRented) override;
+};
+
+class RegularPrice : public PriceBase {
+public:
+	int getPriceCode() override;
+	double getCharge(int daysRented) override;
+};
+
 //Movie - класс, который представляет данные о фильме.
 class Movie
 {
@@ -24,48 +49,77 @@ public:
 	static const int CHLDREN;
 	Movie() {};
 	Movie(const std::string & _title, int _priceCode) : 
-		title(_title), priceCode(_priceCode) 
-	{}
-	void operator=(const Movie& value){
-		title = value.title;
-		priceCode = value.priceCode;
+		title(_title)
+	{
+		setPriceCode(_priceCode);
 	}
-	void setPriceCode(int value) { priceCode = value; }
-	int getPriceCode() const { return priceCode; }
+	Movie& operator=(const Movie& value){
+		title = value.title;
+		setPriceCode(value.getPriceCode());
+		return *this;
+	}
+	void setPriceCode(int value);
+	int getPriceCode() const { return _price->getPriceCode(); }
 	std::string getTitle() const { return title; }
 
-	double getCharge(int daysRented);
+	double getCharge(int daysRented) { return _price->getCharge(daysRented); }
 
 	int getFrequentRenterPoints(int daysRented);
 
 private:
 	std::string title{};
-	int priceCode{0};
+	std::shared_ptr<PriceBase> _price;
 };
 
 const int Movie::REGULAR = 0;
 const int Movie::NEW_RELEASE = 1;
 const int Movie::CHLDREN = 2;
 
-double Movie::getCharge(int daysRented) {
-	double result = 0;
-	// Определить сумму для каждой строки.
-	switch (getPriceCode()) {
-	case Movie::REGULAR:
-		result += 2;
-		if (daysRented > 2)
-			result += (daysRented - 2) * 1.5;
-		break;
-	case Movie::NEW_RELEASE:
-		result += daysRented * 3;
-		break;
-	case Movie::CHLDREN:
-		result += 1.5;
-		if (daysRented > 3)
-			result += (daysRented - 3) * 1.5;
-			break;
+int ChildrensPrice::getPriceCode() {
+	return Movie::REGULAR;
+}
+
+double ChildrensPrice::getCharge(int daysRented){
+	double result = 1.5;
+	if (daysRented > 3)
+		result += (daysRented - 3) * 1.5;
+	return result;
+}
+
+int NewReleasePrice::getPriceCode() {
+	return Movie::NEW_RELEASE;
+}
+
+double NewReleasePrice::getCharge(int daysRented){
+	return daysRented * 3;
+}
+
+int RegularPrice::getPriceCode() {
+	return Movie::CHLDREN;
+}
+
+double RegularPrice::getCharge(int daysRented){
+	double result = 2;
+	if (daysRented > 2) {
+		result += (daysRented - 2) * 1.5;
 	}
 	return result;
+}
+
+void Movie::setPriceCode(int value) {
+	switch (value) {
+		case Movie::REGULAR:
+			_price = std::make_shared<RegularPrice>();
+			break;
+		case Movie::CHLDREN:
+			_price = std::make_shared<ChildrensPrice>();
+			break;
+		case Movie::NEW_RELEASE:
+			_price = std::make_shared<NewReleasePrice>();
+		break;
+		default:
+			throw std::runtime_error("Incorrect Price Code");
+	}
 }
 
 int Movie::getFrequentRenterPoints(int daysRented) {
