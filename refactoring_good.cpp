@@ -33,6 +33,11 @@ public:
 	void setPriceCode(int value) { priceCode = value; }
 	int getPriceCode() const { return priceCode; }
 	std::string getTitle() const { return title; }
+
+	double getCharge(int daysRented);
+
+	int getFrequentRenterPoints(int daysRented);
+
 private:
 	std::string title{};
 	int priceCode{0};
@@ -41,6 +46,35 @@ private:
 const int Movie::REGULAR = 0;
 const int Movie::NEW_RELEASE = 1;
 const int Movie::CHLDREN = 2;
+
+double Movie::getCharge(int daysRented) {
+	double result = 0;
+	// Определить сумму для каждой строки.
+	switch (getPriceCode()) {
+	case Movie::REGULAR:
+		result += 2;
+		if (daysRented > 2)
+			result += (daysRented - 2) * 1.5;
+		break;
+	case Movie::NEW_RELEASE:
+		result += daysRented * 3;
+		break;
+	case Movie::CHLDREN:
+		result += 1.5;
+		if (daysRented > 3)
+			result += (daysRented - 3) * 1.5;
+			break;
+	}
+	return result;
+}
+
+int Movie::getFrequentRenterPoints(int daysRented) {
+	// Бонус за аренду новинки на два дня
+	if ((getPriceCode() == Movie::NEW_RELEASE) && daysRented > 1)
+		return 2;
+	else
+		return 1;
+}
 
 //Rental - класс, представляющий данные о прокате фильма.
 class Rental
@@ -54,31 +88,11 @@ public:
 	int getDaysRented() const { return daysRented; }
 
 	double getCharge() {
-		double result = 0;
-		// Определить сумму для каждой строки.
-		switch (getMovie().getPriceCode()) {
-		case Movie::REGULAR:
-			result += 2;
-			if (getDaysRented() > 2)
-				result += (getDaysRented() - 2) * 1.5;
-			break;
-		case Movie::NEW_RELEASE:
-			result += getDaysRented() * 3;
-			break;
-		case Movie::CHLDREN:
-			result += 1.5;
-			if (getDaysRented() > 3)
-				result += (getDaysRented() - 3) * 1.5;
-				break;
-		}
-		return result;
+		return movie.getCharge(daysRented);
 	}
 	int getFrequentRenterPoints() {
 		// Бонус за аренду новинки на два дня
-		if ((getMovie().getPriceCode() == Movie::NEW_RELEASE) && getDaysRented() > 1)
-			return 2;
-		else
-			return 1;
+		return movie.getFrequentRenterPoints(daysRented);
 	}
 private:
 	Movie movie;
